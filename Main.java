@@ -19,9 +19,12 @@ public class Main {
         centro.agregarProducto("P002", p2);
         centro.agregarProducto("P003", p3);
 
-        System.out.println("\n----- Alta con codigo duplicado (debe rechazarse) -----");
+        System.out.println("\n----- Alta con codigo duplicado (Conjunto debe rechazarlo) -----");
         Producto repetido = new Producto("P001", "Lavandina 2L", 30, 10, u1);
         centro.agregarProducto("P001", repetido);
+
+        System.out.println("\n----- Codigos usados (Conjunto de unicidad) -----");
+        centro.mostrarCodigosUsados();
 
         System.out.println("\n----- Catalogo actual -----");
         centro.mostrarCatalogo();
