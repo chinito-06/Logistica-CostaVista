@@ -6,21 +6,26 @@
 public class CentroLogistico {
     private Diccionario<String, Producto> productos;
     private Cola<Pedido> lineaExpedicion;
+    private Conjunto<String> codigosUsados;
 
     public CentroLogistico(int capacidad) {
         this.productos = new Diccionario<String, Producto>(capacidad);
         this.lineaExpedicion = new Cola<Pedido>(capacidad);
+        this.codigosUsados = new Conjunto<String>(capacidad);
     }
 
     // ----- Objetivo 1: Localizacion de stock (Diccionario) -----
 
-    // Da de alta un producto usando su codigo como clave.
-    // El Diccionario ya rechaza un codigo repetido, asi que no se duplica.
+    // Da de alta un producto. El Conjunto de codigos usados garantiza la
+    // unicidad: si el codigo ya esta registrado, no se agrega.
     public void agregarProducto(String codigo, Producto producto) {
-        boolean agregado = productos.insertar(codigo, producto);
-        if (agregado) {
-            System.out.println("Producto agregado: " + producto);
+        if (codigosUsados.pertenece(codigo)) {
+            System.out.println("Error: codigo duplicado " + codigo + " --> no se agrego el producto");
+            return;
         }
+        codigosUsados.insertar(codigo);
+        productos.insertar(codigo, producto);
+        System.out.println("Producto agregado: " + producto);
     }
 
     // Busca un producto por su codigo sin recorrer todo el catalogo.
@@ -39,6 +44,10 @@ public class CentroLogistico {
 
     public void mostrarCatalogo() {
         productos.mostrar();
+    }
+
+    public void mostrarCodigosUsados() {
+        codigosUsados.mostrar();
     }
 
     // ----- Objetivo 2: Linea de expedicion (Cola FIFO) -----
