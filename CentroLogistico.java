@@ -1,17 +1,20 @@
 // Clase de gestion del centro de distribucion.
 // Guarda las estructuras de datos como atributos y reune las operaciones
-// del sistema en metodos. Por ahora cubre dos objetivos:
+// del sistema en metodos. Por ahora cubre tres objetivos:
 //   1) Localizacion de stock  -> usa el Diccionario.
 //   2) Linea de expedicion    -> usa la Cola FIFO.
+//   3) Trazabilidad           -> usa la Pila (registrar y deshacer movimientos).
 public class CentroLogistico {
     private Diccionario<String, Producto> productos;
     private Cola<Pedido> lineaExpedicion;
     private Conjunto<String> codigosUsados;
+    private Pila<Movimiento> trazabilidad;
 
     public CentroLogistico(int capacidad) {
         this.productos = new Diccionario<String, Producto>(capacidad);
         this.lineaExpedicion = new Cola<Pedido>(capacidad);
         this.codigosUsados = new Conjunto<String>(capacidad);
+        this.trazabilidad = new Pila<Movimiento>(capacidad);
     }
 
     // ----- Objetivo 1: Localizacion de stock (Diccionario) -----
@@ -74,5 +77,44 @@ public class CentroLogistico {
 
     public void mostrarLineaExpedicion() {
         lineaExpedicion.mostrar();
+    }
+
+    // ----- Objetivo 3: Trazabilidad (Pila) -----
+
+    // Cambia el stock de un producto. Antes de aplicar el cambio, registra un
+    // Movimiento en la pila para poder deshacerlo. La cantidad puede ser
+    // negativa (baja); no se permite que el stock quede por debajo de 0.
+    // NOTA: el reordenado del inventario critico (Cola de Prioridad) se
+    // agregara cuando se implemente ese TDA.
+    public void actualizarStock(String codigo, int cantidad) {
+        Producto p = productos.recuperarValor(codigo);
+        if (p == null) {
+            return;
+        }
+        if (p.obtenerStock() + cantidad < 0) {
+            System.out.println("Error: el stock no puede quedar negativo --> no se aplico el cambio");
+            return;
+        }
+        trazabilidad.apilar(new Movimiento("ACTUALIZAR_STOCK", codigo, p.obtenerStock()));
+        p.establecerStock(p.obtenerStock() + cantidad);
+        System.out.println("Stock actualizado: " + p);
+    }
+
+    // Deshace el ultimo movimiento registrado, restaurando el stock previo.
+    public void deshacerUltimoMovimiento() {
+        Movimiento m = trazabilidad.desapilar();
+        if (m == null) {
+            return;
+        }
+        Producto p = productos.recuperarValor(m.obtenerCodigoProducto());
+        if (p == null) {
+            return;
+        }
+        p.establecerStock(m.obtenerStockPrevio());
+        System.out.println("Movimiento deshecho: " + p);
+    }
+
+    public void mostrarTrazabilidad() {
+        trazabilidad.mostrar();
     }
 }

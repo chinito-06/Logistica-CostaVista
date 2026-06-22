@@ -69,6 +69,31 @@ public class Main {
         System.out.println("\n----- Despachar de nuevo con la cola vacia -----");
         centro.despacharProximoPedido();
 
+        // ===== Objetivo 3: Trazabilidad (Pila) =====
+        System.out.println("\n----- Stock inicial de P002 -----");
+        System.out.println(centro.buscarProducto("P002"));
+
+        System.out.println("\n----- Actualizar stock: baja valida (-3) -----");
+        centro.actualizarStock("P002", -3);
+
+        System.out.println("\n----- Actualizar stock: alta (+10) -----");
+        centro.actualizarStock("P002", 10);
+
+        System.out.println("\n----- Intentar baja que deja stock negativo (debe rechazarse) -----");
+        centro.actualizarStock("P002", -1000);
+
+        System.out.println("\n----- Historial de movimientos (Pila) -----");
+        centro.mostrarTrazabilidad();
+
+        System.out.println("\n----- Deshacer ultimo movimiento (vuelve antes del +10) -----");
+        centro.deshacerUltimoMovimiento();
+
+        System.out.println("\n----- Deshacer otro movimiento (vuelve antes del -3) -----");
+        centro.deshacerUltimoMovimiento();
+
+        System.out.println("\n----- Deshacer con la pila vacia (debe avisar) -----");
+        centro.deshacerUltimoMovimiento();
+
         System.out.println("\n===== Fin de la demostracion =====");
     }
 }
