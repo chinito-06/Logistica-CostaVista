@@ -94,6 +94,50 @@ public class Main {
         System.out.println("\n----- Deshacer con la pila vacia (debe avisar) -----");
         centro.deshacerUltimoMovimiento();
 
+        // ===== Objetivo 5: Inventario critico (Cola de Prioridad) =====
+        System.out.println("\n----- Inventario critico (mas urgente = menos stock) -----");
+        centro.mostrarInventarioCritico();
+        System.out.println("Producto mas critico: " + centro.productoMasCritico());
+
+        System.out.println("\n----- Bajar mucho el stock de P003 (pasa a ser el mas critico) -----");
+        centro.actualizarStock("P003", -118);   // P003: 120 -> 2
+        centro.mostrarInventarioCritico();
+        System.out.println("Producto mas critico ahora: " + centro.productoMasCritico());
+
+        System.out.println("\n----- Reponer P003 (+200): deja de ser critico -----");
+        centro.actualizarStock("P003", 200);     // P003: 2 -> 202
+        centro.mostrarInventarioCritico();
+        System.out.println("Producto mas critico ahora: " + centro.productoMasCritico());
+
+        // ===== Objetivo 4: Conexion de ubicaciones (Grafo) =====
+        System.out.println("\n----- Armar el mapa del deposito -----");
+        // Ubicaciones (algunas ya usadas arriba: u1, u2, u3) y dos nuevas
+        Ubicacion u4 = new Ubicacion("UB-04", "D", 3, 2);
+        Ubicacion u5 = new Ubicacion("UB-05", "E", 1, 4);
+        centro.agregarUbicacion(u1);
+        centro.agregarUbicacion(u2);
+        centro.agregarUbicacion(u3);
+        centro.agregarUbicacion(u4);
+        centro.agregarUbicacion(u5);
+
+        // Conexiones (pasillos entre ubicaciones):
+        //   u1 - u2 - u3 - u5
+        //   u1 - u4 - u5
+        centro.conectarUbicaciones(u1, u2);
+        centro.conectarUbicaciones(u2, u3);
+        centro.conectarUbicaciones(u3, u5);
+        centro.conectarUbicaciones(u1, u4);
+        centro.conectarUbicaciones(u4, u5);
+
+        System.out.println("\n----- Matriz de adyacencia -----");
+        centro.mostrarMapa();
+
+        System.out.println("\n----- Camino mas corto de UB-01 a UB-05 (debe ir por u4: 2 saltos) -----");
+        centro.encontrarCamino(u1, u5);
+
+        System.out.println("\n----- Camino mas corto de UB-01 a UB-03 -----");
+        centro.encontrarCamino(u1, u3);
+
         System.out.println("\n===== Fin de la demostracion =====");
     }
 }

@@ -4,17 +4,27 @@
 //   1) Localizacion de stock  -> usa el Diccionario.
 //   2) Linea de expedicion    -> usa la Cola FIFO.
 //   3) Trazabilidad           -> usa la Pila (registrar y deshacer movimientos).
+//   4) Conexion de ubicaciones -> usa el Grafo (camino mas corto en el deposito).
+//   5) Inventario critico      -> usa la Cola de Prioridad (producto con menos stock).
 public class CentroLogistico {
+    // Se usa para invertir la prioridad: menos stock = mas urgente. Como la
+    // cola pone la mayor prioridad al frente, la prioridad es TOPE - stock.
+    private int TOPE_PRIORIDAD = 100000;
+
     private Diccionario<String, Producto> productos;
     private Cola<Pedido> lineaExpedicion;
     private Conjunto<String> codigosUsados;
     private Pila<Movimiento> trazabilidad;
+    private GrafoMatrizAdyacencia<Ubicacion> mapaDeposito;
+    private ColaPrioridad<Producto> inventarioCritico;
 
     public CentroLogistico(int capacidad) {
         this.productos = new Diccionario<String, Producto>(capacidad);
         this.lineaExpedicion = new Cola<Pedido>(capacidad);
         this.codigosUsados = new Conjunto<String>(capacidad);
         this.trazabilidad = new Pila<Movimiento>(capacidad);
+        this.mapaDeposito = new GrafoMatrizAdyacencia<Ubicacion>(capacidad, false);
+        this.inventarioCritico = new ColaPrioridad<Producto>(capacidad);
     }
 
     // ----- Objetivo 1: Localizacion de stock (Diccionario) -----
@@ -28,6 +38,7 @@ public class CentroLogistico {
         }
         codigosUsados.insertar(codigo);
         productos.insertar(codigo, producto);
+        inventarioCritico.insertar(producto, TOPE_PRIORIDAD - producto.obtenerStock());
         System.out.println("Producto agregado: " + producto);
     }
 
@@ -84,8 +95,8 @@ public class CentroLogistico {
     // Cambia el stock de un producto. Antes de aplicar el cambio, registra un
     // Movimiento en la pila para poder deshacerlo. La cantidad puede ser
     // negativa (baja); no se permite que el stock quede por debajo de 0.
-    // NOTA: el reordenado del inventario critico (Cola de Prioridad) se
-    // agregara cuando se implemente ese TDA.
+    // Al cambiar el stock cambia la urgencia, asi que se reordena el producto
+    // en el inventario critico (Cola de Prioridad).
     public void actualizarStock(String codigo, int cantidad) {
         Producto p = productos.recuperarValor(codigo);
         if (p == null) {
@@ -97,6 +108,7 @@ public class CentroLogistico {
         }
         trazabilidad.apilar(new Movimiento("ACTUALIZAR_STOCK", codigo, p.obtenerStock()));
         p.establecerStock(p.obtenerStock() + cantidad);
+        reordenarInventarioCritico(p);
         System.out.println("Stock actualizado: " + p);
     }
 
@@ -111,10 +123,50 @@ public class CentroLogistico {
             return;
         }
         p.establecerStock(m.obtenerStockPrevio());
+        reordenarInventarioCritico(p);
         System.out.println("Movimiento deshecho: " + p);
+    }
+
+    // Reubica un producto en el inventario critico segun su stock actual:
+    // lo saca y lo vuelve a insertar con la prioridad actualizada.
+    private void reordenarInventarioCritico(Producto p) {
+        inventarioCritico.eliminarElemento(p);
+        inventarioCritico.insertar(p, TOPE_PRIORIDAD - p.obtenerStock());
     }
 
     public void mostrarTrazabilidad() {
         trazabilidad.mostrar();
+    }
+
+    // ----- Objetivo 4: Conexion de ubicaciones (Grafo) -----
+
+    // Agrega una ubicacion como vertice del mapa del deposito.
+    public void agregarUbicacion(Ubicacion ubicacion) {
+        mapaDeposito.insertarVertice(ubicacion);
+    }
+
+    // Conecta dos ubicaciones (arista no dirigida = se puede ir y volver).
+    public void conectarUbicaciones(Ubicacion a, Ubicacion b) {
+        mapaDeposito.insertarArista(a, b);
+    }
+
+    // Muestra el camino mas corto (menos saltos) entre dos ubicaciones.
+    public void encontrarCamino(Ubicacion origen, Ubicacion destino) {
+        mapaDeposito.caminoMasCorto(origen, destino);
+    }
+
+    public void mostrarMapa() {
+        mapaDeposito.mostrarMatriz();
+    }
+
+    // ----- Objetivo 5: Inventario critico (Cola de Prioridad) -----
+
+    // Devuelve el producto con menos stock (el mas urgente de reponer).
+    public Producto productoMasCritico() {
+        return inventarioCritico.frente();
+    }
+
+    public void mostrarInventarioCritico() {
+        inventarioCritico.mostrar();
     }
 }
