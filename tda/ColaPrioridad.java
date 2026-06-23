@@ -1,3 +1,5 @@
+package tda;
+
 public class ColaPrioridad<T> implements IColaPrioridad<T> {
     private T[] datos;
     private int[] prioridades;

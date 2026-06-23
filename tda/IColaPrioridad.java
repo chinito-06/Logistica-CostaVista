@@ -1,3 +1,5 @@
+package tda;
+
 public interface IColaPrioridad<T> {
     public void crear();
     public boolean estaVacia();

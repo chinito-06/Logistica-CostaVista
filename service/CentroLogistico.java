@@ -1,3 +1,8 @@
+package service;
+
+import tda.*;
+import model.*;
+
 // Clase de gestion del centro de distribucion.
 // Guarda las estructuras de datos como atributos y reune las operaciones
 // del sistema en metodos. Por ahora cubre tres objetivos:
@@ -77,12 +82,20 @@ public class CentroLogistico {
     }
 
     // Despacha el pedido mas antiguo de la cola (orden de llegada, FIFO).
+    // Al despachar, los productos del pedido salen del deposito, asi que se
+    // descuenta del stock la cantidad pedida de cada item (con actualizarStock,
+    // que registra el movimiento y reordena el inventario critico).
     public Pedido despacharProximoPedido() {
         Pedido p = lineaExpedicion.desencolar();
         if (p == null) {
             return null;
         }
         p.establecerEstado("DESPACHADO");
+        Producto[] items = p.obtenerItems();
+        int[] cantidades = p.obtenerCantidades();
+        for (int i = 0; i < p.obtenerCantidadItems(); i++) {
+            actualizarStock(items[i].obtenerCodigo(), -cantidades[i]);
+        }
         return p;
     }
 

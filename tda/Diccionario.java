@@ -1,3 +1,5 @@
+package tda;
+
 public class Diccionario<K, V> implements IDiccionario<K, V> {
     private Dato<K, V>[] datosDiccionario;
     private int cantidad;

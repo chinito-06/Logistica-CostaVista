@@ -1,3 +1,5 @@
+package tda;
+
 public interface IGrafo<T> {
     void insertarVertice(T vertice);
     void eliminarVertice(T vertice);

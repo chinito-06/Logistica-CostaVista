@@ -1,3 +1,5 @@
+package tda;
+
 public class GrafoMatrizAdyacencia<T> implements IGrafo<T> {
     private T[] vertices;
     private int[][] matriz;

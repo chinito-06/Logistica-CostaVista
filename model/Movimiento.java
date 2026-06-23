@@ -1,3 +1,5 @@
+package model;
+
 public class Movimiento {
     private String tipo;
     private String codigoProducto;
