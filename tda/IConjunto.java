@@ -1,3 +1,5 @@
+package tda;
+
 public interface IConjunto<T> {
     public void crear();
     public boolean esVacio();

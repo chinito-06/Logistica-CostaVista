@@ -1,3 +1,5 @@
+package tda;
+
 public class Dato<K, V> {
     private K clave;
     private V valor;

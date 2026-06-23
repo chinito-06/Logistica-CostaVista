@@ -1,3 +1,8 @@
+package app;
+
+import model.*;
+import service.*;
+
 public class Main {
     public static void main(String[] args) {
         System.out.println("===== CostaVista Logistics =====");
@@ -13,7 +18,7 @@ public class Main {
         Producto p2 = new Producto("P002", "Jabon en polvo", 8, 15, u2);
         Producto p3 = new Producto("P003", "Esponja x3", 120, 20, u3);
 
-        // ===== Objetivo 1: Localizacion de stock (Diccionario) =====
+        // ===== Objetivo 1: Localizacion de stock (Diccionario) y unicidad (Conjunto) =====
         System.out.println("\n----- Alta de productos -----");
         centro.agregarProducto("P001", p1);
         centro.agregarProducto("P002", p2);
@@ -38,36 +43,6 @@ public class Main {
         System.out.println("\n----- Buscar codigo inexistente (debe avisar) -----");
         Ubicacion noExiste = centro.buscarUbicacion("P999");
         System.out.println("Ubicacion de P999 -> " + noExiste);
-
-        // ===== Objetivo 2: Linea de expedicion (Cola FIFO) =====
-        System.out.println("\n----- Despachar con la cola vacia (debe avisar) -----");
-        Pedido vacio = centro.despacharProximoPedido();
-        System.out.println("Pedido despachado -> " + vacio);
-
-        System.out.println("\n----- Armar y encolar pedidos -----");
-        Pedido ped1 = new Pedido("PED-1", 5);
-        ped1.agregarItem(p1);
-        ped1.agregarItem(p2);
-
-        Pedido ped2 = new Pedido("PED-2", 5);
-        ped2.agregarItem(p3);
-
-        centro.marcarPedidoListo(ped1);
-        centro.marcarPedidoListo(ped2);
-        System.out.println("PED-1 -> " + ped1);
-        System.out.println("PED-2 -> " + ped2);
-
-        System.out.println("\n----- Cola de expedicion -----");
-        centro.mostrarLineaExpedicion();
-
-        System.out.println("\n----- Despachar en orden de llegada (FIFO) -----");
-        Pedido despachado1 = centro.despacharProximoPedido();
-        System.out.println("Despachado 1ro -> " + despachado1);
-        Pedido despachado2 = centro.despacharProximoPedido();
-        System.out.println("Despachado 2do -> " + despachado2);
-
-        System.out.println("\n----- Despachar de nuevo con la cola vacia -----");
-        centro.despacharProximoPedido();
 
         // ===== Objetivo 3: Trazabilidad (Pila) =====
         System.out.println("\n----- Stock inicial de P002 -----");
@@ -109,9 +84,51 @@ public class Main {
         centro.mostrarInventarioCritico();
         System.out.println("Producto mas critico ahora: " + centro.productoMasCritico());
 
+        // ===== Objetivo 2: Linea de expedicion (Cola FIFO) =====
+        System.out.println("\n----- Despachar con la cola vacia (debe avisar) -----");
+        Pedido vacio = centro.despacharProximoPedido();
+        System.out.println("Pedido despachado -> " + vacio);
+
+        System.out.println("\n----- Armar pedidos: agregarItem(producto, cantidad) -----");
+        Pedido ped1 = new Pedido("PED-1", 5);
+        ped1.agregarItem(p1, 5);   // 5 de P001 (hay 50)
+        ped1.agregarItem(p2, 2);   // 2 de P002 (hay 8)
+
+        Pedido ped2 = new Pedido("PED-2", 5);
+        ped2.agregarItem(p3, 10);  // 10 de P003 (hay 202)
+
+        System.out.println("\n----- Agregar item con stock insuficiente (debe rechazarse) -----");
+        ped2.agregarItem(p2, 100); // pide 100 de P002, hay 8
+
+        centro.marcarPedidoListo(ped1);
+        centro.marcarPedidoListo(ped2);
+        System.out.println("PED-1 -> " + ped1);
+        System.out.println("PED-2 -> " + ped2);
+
+        System.out.println("\n----- Cola de expedicion -----");
+        centro.mostrarLineaExpedicion();
+
+        System.out.println("\n----- Stock antes de despachar -----");
+        System.out.println("P001: " + centro.buscarProducto("P001").obtenerStock()
+            + " | P002: " + centro.buscarProducto("P002").obtenerStock()
+            + " | P003: " + centro.buscarProducto("P003").obtenerStock());
+
+        System.out.println("\n----- Despachar en orden de llegada (FIFO, descuenta la cantidad pedida) -----");
+        Pedido despachado1 = centro.despacharProximoPedido();   // PED-1: -5 de P001, -2 de P002
+        System.out.println("Despachado 1ro -> " + despachado1);
+        Pedido despachado2 = centro.despacharProximoPedido();   // PED-2: -10 de P003
+        System.out.println("Despachado 2do -> " + despachado2);
+
+        System.out.println("\n----- Stock despues de despachar -----");
+        System.out.println("P001: " + centro.buscarProducto("P001").obtenerStock()
+            + " | P002: " + centro.buscarProducto("P002").obtenerStock()
+            + " | P003: " + centro.buscarProducto("P003").obtenerStock());
+
+        System.out.println("\n----- Despachar de nuevo con la cola vacia -----");
+        centro.despacharProximoPedido();
+
         // ===== Objetivo 4: Conexion de ubicaciones (Grafo) =====
         System.out.println("\n----- Armar el mapa del deposito -----");
-        // Ubicaciones (algunas ya usadas arriba: u1, u2, u3) y dos nuevas
         Ubicacion u4 = new Ubicacion("UB-04", "D", 3, 2);
         Ubicacion u5 = new Ubicacion("UB-05", "E", 1, 4);
         centro.agregarUbicacion(u1);

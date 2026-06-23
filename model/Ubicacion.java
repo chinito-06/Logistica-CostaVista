@@ -1,3 +1,5 @@
+package model;
+
 public class Ubicacion {
     private String id;
     private String pasillo;

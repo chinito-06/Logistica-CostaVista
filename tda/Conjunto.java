@@ -1,3 +1,5 @@
+package tda;
+
 public class Conjunto<T> implements IConjunto<T> {
     private T[] datos;
     private int cantidad;

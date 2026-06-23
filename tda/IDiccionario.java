@@ -1,3 +1,5 @@
+package tda;
+
 public interface IDiccionario<K, V> {
     public boolean insertar(K clave, V valor);
     public V recuperarValor(K clave);
